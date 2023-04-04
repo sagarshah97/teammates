@@ -354,31 +354,24 @@ public final class StudentsLogic {
         StudentAttributes.sortBySectionName(mergedList);
 
         List<String> invalidSectionList = new ArrayList<>();
-        int sectionStudentCount = 1;
+        int studentsCount = 1;
         for (int i = 1; i < mergedList.size(); i++) {
             StudentAttributes currentStudent = mergedList.get(i);
             StudentAttributes previousStudent = mergedList.get(i - 1);
             if (currentStudent.getSection().equals(previousStudent.getSection())) {
-                sectionStudentCount++;
+                studentsCount++;
             } else {
-                if (sectionStudentCount > Const.SECTION_SIZE_LIMIT) {
+                if (studentsCount > Const.SECTION_SIZE_LIMIT) {
                     invalidSectionList.add(previousStudent.getSection());
                 }
-                sectionStudentCount = 1;
+                studentsCount = 1;
             }
 
-            if (i == mergedList.size() - 1 && sectionStudentCount > Const.SECTION_SIZE_LIMIT) {
+            if (i == mergedList.size() - 1 && studentsCount > Const.SECTION_SIZE_LIMIT) {
                 invalidSectionList.add(currentStudent.getSection());
             }
         }
 
-        return generateErrorMessage(invalidSectionList);
-    }
-
-    /*
-     * Generates the error message for getSectionInvalidityInfo() method.
-     */
-    private String generateErrorMessage(List<String> invalidSectionList) {
         StringJoiner errorMessage = new StringJoiner(" ");
         for (String section : invalidSectionList) {
             errorMessage.add(String.format(
@@ -403,8 +396,10 @@ public final class StudentsLogic {
         for (int i = 1; i < mergedList.size(); i++) {
             StudentAttributes currentStudent = mergedList.get(i);
             StudentAttributes previousStudent = mergedList.get(i - 1);
-            boolean hasInvalidTeamName = checkInvalidTeamName(currentStudent, previousStudent, invalidTeamList);
-            if (hasInvalidTeamName) {
+            if (currentStudent.getTeam().equals(previousStudent.getTeam())
+                    && !currentStudent.getSection().equals(previousStudent.getSection())
+                    && !invalidTeamList.contains(currentStudent.getTeam())) {
+
                 errorMessage.add(String.format(ERROR_INVALID_TEAM_NAME,
                         currentStudent.getTeam(),
                         previousStudent.getSection(),
@@ -419,16 +414,6 @@ public final class StudentsLogic {
         }
 
         return errorMessage.toString();
-    }
-
-    /*
-     * Checks the conditions for deciding whether the name of the team is valid.
-     */
-    private boolean checkInvalidTeamName(StudentAttributes currentStudent,
-            StudentAttributes previousStudent, List<String> invalidTeamList) {
-        return currentStudent.getTeam().equals(previousStudent.getTeam())
-            && !currentStudent.getSection().equals(previousStudent.getSection())
-            && !invalidTeamList.contains(currentStudent.getTeam());
     }
 
     /**
