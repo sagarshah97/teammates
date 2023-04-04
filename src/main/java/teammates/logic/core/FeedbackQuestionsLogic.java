@@ -311,18 +311,17 @@ public final class FeedbackQuestionsLogic {
         assert instructorGiver != null || studentGiver != null;
 
         Map<String, FeedbackQuestionRecipient> recipients = new HashMap<>();
-        //rename variable to a more meaningful name
-        boolean isGivingFeedbackAsStudent = studentGiver != null;
-        boolean isGivingFeedbackAsInstructor = instructorGiver != null;
+        boolean isStudentGiver = studentGiver != null;
+        boolean isInstructorGiver = instructorGiver != null;
 
         String giverEmail = "";
         String giverTeam = "";
         String giverSection = "";
-        if (isGivingFeedbackAsStudent) {
+        if (isStudentGiver) {
             giverEmail = studentGiver.getEmail();
             giverTeam = studentGiver.getTeam();
             giverSection = studentGiver.getSection();
-        } else if (isGivingFeedbackAsInstructor) {
+        } else if (isInstructorGiver) {
             giverEmail = instructorGiver.getEmail();
             giverTeam = Const.USER_TEAM_FOR_INSTRUCTOR;
             giverSection = Const.DEFAULT_SECTION;
@@ -362,7 +361,7 @@ public final class FeedbackQuestionsLogic {
                 }
             }
             for (StudentAttributes student : studentList) {
-                if (isGivingFeedbackAsInstructor && !instructorGiver.isAllowedForPrivilege(
+                if (isInstructorGiver && !instructorGiver.isAllowedForPrivilege(
                         student.getSection(), question.getFeedbackSessionName(),
                         Const.InstructorPermissions.CAN_SUBMIT_SESSION_IN_SECTIONS)) {
                     // instructor can only see students in allowed sections for him/her
@@ -386,7 +385,7 @@ public final class FeedbackQuestionsLogic {
             }
             for (InstructorAttributes instr : instructorsInCourse) {
                 // remove hidden instructors for students
-                if (isGivingFeedbackAsStudent && !instr.isDisplayedToStudents()) {
+                if (isStudentGiver && !instr.isDisplayedToStudents()) {
                     continue;
                 }
                 // Ensure instructor does not evaluate himself
@@ -420,7 +419,7 @@ public final class FeedbackQuestionsLogic {
                 }
             }
             for (Map.Entry<String, List<StudentAttributes>> team : teamToTeamMembersTable.entrySet()) {
-                if (isGivingFeedbackAsInstructor && !instructorGiver.isAllowedForPrivilege(
+                if (isInstructorGiver && !instructorGiver.isAllowedForPrivilege(
                         team.getValue().iterator().next().getSection(),
                         question.getFeedbackSessionName(),
                         Const.InstructorPermissions.CAN_SUBMIT_SESSION_IN_SECTIONS)) {

@@ -271,58 +271,6 @@ public final class Logger {
         return stackTraceToDisplay;
     }
 
-    // private String formatLogMessage(String message, LogSeverity severity) {
-    //     if (Config.IS_DEV_SERVER) {
-    //         return formatLogMessageForHumanDisplay(message);
-    //     }
-    //     return formatLogMessageForCloudLogging(message, severity);
-    // }
-
-    // private String formatLogMessageForHumanDisplay(String message) {
-    //     StringBuilder prefix = new StringBuilder();
-
-    //     StackTraceElement source = getLoggerSource();
-    //     if (source != null) {
-    //         prefix.append(source.getClassName()).append(':')
-    //                 .append(source.getMethodName()).append(':')
-    //                 .append(source.getLineNumber()).append(':');
-    //     }
-    //     prefix.append(' ');
-
-    //     if (RequestTracer.getTraceId() == null) {
-    //         return prefix.toString() + message;
-    //     }
-    //     return prefix.toString() + "[" + RequestTracer.getTraceId() + "] " + message;
-    // }
-
-    // private String formatLogMessageForCloudLogging(String message, LogSeverity severity) {
-    //     return JsonUtils.toCompactJson(getBaseCloudLoggingPayload(message, severity));
-    // }
-
-    // private Map<String, Object> getBaseCloudLoggingPayload(String message, LogSeverity severity) {
-    //     Map<String, Object> payload = new HashMap<>();
-    //     payload.put("message", message);
-    //     payload.put("severity", severity);
-
-    //     StackTraceElement source = getLoggerSource();
-    //     if (source != null) {
-    //         SourceLocation sourceLocation = new SourceLocation(
-    //                 source.getClassName(), (long) source.getLineNumber(), source.getMethodName());
-    //         payload.put("logging.googleapis.com/sourceLocation", sourceLocation);
-    //     }
-
-    //     if (RequestTracer.getTraceId() != null) {
-    //         payload.put("logging.googleapis.com/trace",
-    //                 "projects/" + Config.APP_ID + "/traces/" + RequestTracer.getTraceId());
-    //     }
-
-    //     if (RequestTracer.getSpanId() != null) {
-    //         payload.put("logging.googleapis.com/spanId", RequestTracer.getSpanId());
-    //     }
-
-    //     return payload;
-    // }
-
     private StackTraceElement getLoggerSource() {
         StackTraceElement[] stes = Thread.currentThread().getStackTrace();
         for (int i = 0; i < stes.length; i++) {

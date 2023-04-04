@@ -594,19 +594,6 @@ public final class FeedbackSessionsLogic {
         return session.isVisible() && !questionsWithVisibleResponses.isEmpty();
     }
 
-    /**
-     * Returns true if there are any questions for the specified user type (students/instructors) to answer.
-     */
-    // public boolean isFeedbackSessionForUserTypeToAnswer(FeedbackSessionAttributes session, boolean isInstructor) {
-    //     if (!session.isVisible()) {
-    //         return false;
-    //     }
-
-    //     return isInstructor
-    //             ? fqLogic.hasFeedbackQuestionsForInstructors(session, false)
-    //             : fqLogic.hasFeedbackQuestionsForStudents(session);
-    // }
-
     private void updateFeedbackSessionsDeadlinesWithNewEmail(String courseId, String oldEmailAddress,
             String newEmailAddress, boolean isInstructor) {
         if (oldEmailAddress.equals(newEmailAddress)) {
