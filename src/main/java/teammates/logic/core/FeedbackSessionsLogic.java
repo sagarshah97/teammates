@@ -574,7 +574,7 @@ public final class FeedbackSessionsLogic {
      */
     public boolean isFeedbackSessionViewableToUserType(FeedbackSessionAttributes session, boolean isInstructor) {
         // Allow user to view the feedback session if there are questions for them
-        if (isFeedbackSessionForUserTypeToAnswer(session, isInstructor)) {
+        if (fqLogic.isFeedbackSessionForUserTypeToAnswer(session, isInstructor)) {
             return true;
         }
 
@@ -597,15 +597,15 @@ public final class FeedbackSessionsLogic {
     /**
      * Returns true if there are any questions for the specified user type (students/instructors) to answer.
      */
-    public boolean isFeedbackSessionForUserTypeToAnswer(FeedbackSessionAttributes session, boolean isInstructor) {
-        if (!session.isVisible()) {
-            return false;
-        }
+    // public boolean isFeedbackSessionForUserTypeToAnswer(FeedbackSessionAttributes session, boolean isInstructor) {
+    //     if (!session.isVisible()) {
+    //         return false;
+    //     }
 
-        return isInstructor
-                ? fqLogic.hasFeedbackQuestionsForInstructors(session, false)
-                : fqLogic.hasFeedbackQuestionsForStudents(session);
-    }
+    //     return isInstructor
+    //             ? fqLogic.hasFeedbackQuestionsForInstructors(session, false)
+    //             : fqLogic.hasFeedbackQuestionsForStudents(session);
+    // }
 
     private void updateFeedbackSessionsDeadlinesWithNewEmail(String courseId, String oldEmailAddress,
             String newEmailAddress, boolean isInstructor) {

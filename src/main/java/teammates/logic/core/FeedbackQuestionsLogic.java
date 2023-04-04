@@ -139,6 +139,22 @@ public final class FeedbackQuestionsLogic {
         return feedbackQuestions.stream().filter(q -> q.getQuestionType().equals(questionType)).collect(Collectors.toList());
     }
 
+    /**
+     * Returns true if there are any questions for the specified user type (students/instructors) to answer.
+     * @param session the details of the session
+     * @param isInstructor the check for instructor persona
+     * @return true for specified user type
+     */
+    public boolean isFeedbackSessionForUserTypeToAnswer(FeedbackSessionAttributes session, boolean isInstructor) {
+        if (!session.isVisible()) {
+            return false;
+        }
+
+        return isInstructor
+                ? hasFeedbackQuestionsForInstructors(session, false)
+                : hasFeedbackQuestionsForStudents(session);
+    }
+
     // TODO can be removed once we are sure that question numbers will be consistent
     private boolean areQuestionNumbersConsistent(List<FeedbackQuestionAttributes> questions) {
         Set<Integer> questionNumbersInSession = new HashSet<>();
@@ -295,18 +311,18 @@ public final class FeedbackQuestionsLogic {
         assert instructorGiver != null || studentGiver != null;
 
         Map<String, FeedbackQuestionRecipient> recipients = new HashMap<>();
-
-        boolean isStudentGiver = studentGiver != null;
-        boolean isInstructorGiver = instructorGiver != null;
+        //rename variable to a more meaningful name
+        boolean isGivingFeedbackAsStudent = studentGiver != null;
+        boolean isGivingFeedbackAsInstructor = instructorGiver != null;
 
         String giverEmail = "";
         String giverTeam = "";
         String giverSection = "";
-        if (isStudentGiver) {
+        if (isGivingFeedbackAsStudent) {
             giverEmail = studentGiver.getEmail();
             giverTeam = studentGiver.getTeam();
             giverSection = studentGiver.getSection();
-        } else if (isInstructorGiver) {
+        } else if (isGivingFeedbackAsInstructor) {
             giverEmail = instructorGiver.getEmail();
             giverTeam = Const.USER_TEAM_FOR_INSTRUCTOR;
             giverSection = Const.DEFAULT_SECTION;
@@ -346,7 +362,7 @@ public final class FeedbackQuestionsLogic {
                 }
             }
             for (StudentAttributes student : studentList) {
-                if (isInstructorGiver && !instructorGiver.isAllowedForPrivilege(
+                if (isGivingFeedbackAsInstructor && !instructorGiver.isAllowedForPrivilege(
                         student.getSection(), question.getFeedbackSessionName(),
                         Const.InstructorPermissions.CAN_SUBMIT_SESSION_IN_SECTIONS)) {
                     // instructor can only see students in allowed sections for him/her
@@ -370,7 +386,7 @@ public final class FeedbackQuestionsLogic {
             }
             for (InstructorAttributes instr : instructorsInCourse) {
                 // remove hidden instructors for students
-                if (isStudentGiver && !instr.isDisplayedToStudents()) {
+                if (isGivingFeedbackAsStudent && !instr.isDisplayedToStudents()) {
                     continue;
                 }
                 // Ensure instructor does not evaluate himself
@@ -404,7 +420,7 @@ public final class FeedbackQuestionsLogic {
                 }
             }
             for (Map.Entry<String, List<StudentAttributes>> team : teamToTeamMembersTable.entrySet()) {
-                if (isInstructorGiver && !instructorGiver.isAllowedForPrivilege(
+                if (isGivingFeedbackAsInstructor && !instructorGiver.isAllowedForPrivilege(
                         team.getValue().iterator().next().getSection(),
                         question.getFeedbackSessionName(),
                         Const.InstructorPermissions.CAN_SUBMIT_SESSION_IN_SECTIONS)) {
