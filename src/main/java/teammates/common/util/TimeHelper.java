@@ -80,7 +80,7 @@ public final class TimeHelper {
             processedPattern = pattern.replace("a", "'NOON'");
         }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(processedPattern);
-        return zonedDateTime.format(formatter);
+        return zonedDateTime.format(formatter).replace("a.m.", "AM").replace("p.m.", "PM");
     }
 
     /**
