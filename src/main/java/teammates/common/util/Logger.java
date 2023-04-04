@@ -28,6 +28,7 @@ public final class Logger {
 
     private final java.util.logging.Logger standardLog;
     private final java.util.logging.Logger errorLog;
+    private FormatLog formatLog = new FormatLog();
 
     private Logger() {
         StackTraceElement logRequester = getLoggerSource();
@@ -47,14 +48,14 @@ public final class Logger {
      * Logs a message at FINE level.
      */
     public void fine(String message) {
-        standardLog.fine(formatLogMessage(message, LogSeverity.DEBUG));
+        standardLog.fine(formatLog.formatLogMessage(message, LogSeverity.DEBUG, getLoggerSource()));
     }
 
     /**
      * Logs a message at INFO level.
      */
     public void info(String message) {
-        standardLog.info(formatLogMessage(message, LogSeverity.INFO));
+        standardLog.info(formatLog.formatLogMessage(message, LogSeverity.INFO, getLoggerSource()));
     }
 
     /**
@@ -143,10 +144,11 @@ public final class Logger {
     public void event(String message, LogDetails details) {
         String logMessage;
         if (Config.IS_DEV_SERVER) {
-            logMessage = formatLogMessageForHumanDisplay(message) + " extra_info: "
+            logMessage = formatLog.formatLogMessageForHumanDisplay(message, getLoggerSource()) + " extra_info: "
                     + JsonUtils.toCompactJson(details);
         } else {
-            Map<String, Object> payload = getBaseCloudLoggingPayload(message, LogSeverity.INFO);
+            Map<String, Object> payload = formatLog.getFormattedBaseCloudLoggingPayload(message,
+                    LogSeverity.INFO, getLoggerSource());
             Map<String, Object> detailsSpecificPayload =
                     JsonUtils.fromJson(JsonUtils.toCompactJson(details), new TypeToken<Map<String, Object>>(){}.getType());
             payload.putAll(detailsSpecificPayload);
@@ -160,7 +162,7 @@ public final class Logger {
      * Logs a message at WARNING level.
      */
     public void warning(String message) {
-        standardLog.warning(formatLogMessage(message, LogSeverity.WARNING));
+        standardLog.warning(formatLog.formatLogMessage(message, LogSeverity.WARNING, getLoggerSource()));
     }
 
     /**
@@ -175,7 +177,7 @@ public final class Logger {
      * Logs a message at SEVERE level.
      */
     public void severe(String message) {
-        errorLog.severe(formatLogMessage(message, LogSeverity.ERROR));
+        errorLog.severe(formatLog.formatLogMessage(message, LogSeverity.ERROR, getLoggerSource()));
     }
 
     /**
@@ -193,11 +195,11 @@ public final class Logger {
                 t.printStackTrace(pw);
             }
 
-            return formatLogMessageForHumanDisplay(message) + " stack_trace: "
+            return formatLog.formatLogMessageForHumanDisplay(message, getLoggerSource()) + " stack_trace: "
                     + System.lineSeparator() + sw.toString();
         }
 
-        Map<String, Object> payload = getBaseCloudLoggingPayload(message, severity);
+        Map<String, Object> payload = formatLog.getFormattedBaseCloudLoggingPayload(message, severity, getLoggerSource());
 
         List<String> exceptionClasses = new ArrayList<>();
         List<List<String>> exceptionStackTraces = new ArrayList<>();
@@ -269,57 +271,57 @@ public final class Logger {
         return stackTraceToDisplay;
     }
 
-    private String formatLogMessage(String message, LogSeverity severity) {
-        if (Config.IS_DEV_SERVER) {
-            return formatLogMessageForHumanDisplay(message);
-        }
-        return formatLogMessageForCloudLogging(message, severity);
-    }
+    // private String formatLogMessage(String message, LogSeverity severity) {
+    //     if (Config.IS_DEV_SERVER) {
+    //         return formatLogMessageForHumanDisplay(message);
+    //     }
+    //     return formatLogMessageForCloudLogging(message, severity);
+    // }
 
-    private String formatLogMessageForHumanDisplay(String message) {
-        StringBuilder prefix = new StringBuilder();
+    // private String formatLogMessageForHumanDisplay(String message) {
+    //     StringBuilder prefix = new StringBuilder();
 
-        StackTraceElement source = getLoggerSource();
-        if (source != null) {
-            prefix.append(source.getClassName()).append(':')
-                    .append(source.getMethodName()).append(':')
-                    .append(source.getLineNumber()).append(':');
-        }
-        prefix.append(' ');
+    //     StackTraceElement source = getLoggerSource();
+    //     if (source != null) {
+    //         prefix.append(source.getClassName()).append(':')
+    //                 .append(source.getMethodName()).append(':')
+    //                 .append(source.getLineNumber()).append(':');
+    //     }
+    //     prefix.append(' ');
 
-        if (RequestTracer.getTraceId() == null) {
-            return prefix.toString() + message;
-        }
-        return prefix.toString() + "[" + RequestTracer.getTraceId() + "] " + message;
-    }
+    //     if (RequestTracer.getTraceId() == null) {
+    //         return prefix.toString() + message;
+    //     }
+    //     return prefix.toString() + "[" + RequestTracer.getTraceId() + "] " + message;
+    // }
 
-    private String formatLogMessageForCloudLogging(String message, LogSeverity severity) {
-        return JsonUtils.toCompactJson(getBaseCloudLoggingPayload(message, severity));
-    }
+    // private String formatLogMessageForCloudLogging(String message, LogSeverity severity) {
+    //     return JsonUtils.toCompactJson(getBaseCloudLoggingPayload(message, severity));
+    // }
 
-    private Map<String, Object> getBaseCloudLoggingPayload(String message, LogSeverity severity) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("message", message);
-        payload.put("severity", severity);
+    // private Map<String, Object> getBaseCloudLoggingPayload(String message, LogSeverity severity) {
+    //     Map<String, Object> payload = new HashMap<>();
+    //     payload.put("message", message);
+    //     payload.put("severity", severity);
 
-        StackTraceElement source = getLoggerSource();
-        if (source != null) {
-            SourceLocation sourceLocation = new SourceLocation(
-                    source.getClassName(), (long) source.getLineNumber(), source.getMethodName());
-            payload.put("logging.googleapis.com/sourceLocation", sourceLocation);
-        }
+    //     StackTraceElement source = getLoggerSource();
+    //     if (source != null) {
+    //         SourceLocation sourceLocation = new SourceLocation(
+    //                 source.getClassName(), (long) source.getLineNumber(), source.getMethodName());
+    //         payload.put("logging.googleapis.com/sourceLocation", sourceLocation);
+    //     }
 
-        if (RequestTracer.getTraceId() != null) {
-            payload.put("logging.googleapis.com/trace",
-                    "projects/" + Config.APP_ID + "/traces/" + RequestTracer.getTraceId());
-        }
+    //     if (RequestTracer.getTraceId() != null) {
+    //         payload.put("logging.googleapis.com/trace",
+    //                 "projects/" + Config.APP_ID + "/traces/" + RequestTracer.getTraceId());
+    //     }
 
-        if (RequestTracer.getSpanId() != null) {
-            payload.put("logging.googleapis.com/spanId", RequestTracer.getSpanId());
-        }
+    //     if (RequestTracer.getSpanId() != null) {
+    //         payload.put("logging.googleapis.com/spanId", RequestTracer.getSpanId());
+    //     }
 
-        return payload;
-    }
+    //     return payload;
+    // }
 
     private StackTraceElement getLoggerSource() {
         StackTraceElement[] stes = Thread.currentThread().getStackTrace();
