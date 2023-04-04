@@ -3,6 +3,8 @@ package teammates.common.datatransfer.attributes;
 import java.util.List;
 import java.util.function.Consumer;
 
+import teammates.common.util.Config;
+import teammates.common.util.Const;
 import teammates.storage.entity.BaseEntity;
 
 /**
@@ -18,6 +20,19 @@ public abstract class EntityAttributes<E extends BaseEntity> {
      */
     public boolean isValid() {
         return getInvalidityInfo().isEmpty();
+    }
+
+    /**
+     * Returns the registration URL based on the entity type using the specified key.
+     * @param key is the key specified for either student or instructor
+     * @param entityType defines the persona for which the registration url is being generated
+     * @return String
+     */
+    public String registrationPageUrl(String key, String entityType) {
+        return Config.getFrontEndAppUrl(Const.WebPageURIs.JOIN_PAGE)
+                .withRegistrationKey(key)
+                .withEntityType(entityType)
+                .toString();
     }
 
     /**

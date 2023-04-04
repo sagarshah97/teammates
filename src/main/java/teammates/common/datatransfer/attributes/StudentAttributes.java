@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
-import teammates.common.util.Config;
 import teammates.common.util.Const;
 import teammates.common.util.FieldValidator;
 import teammates.common.util.SanitizationHelper;
@@ -93,10 +92,7 @@ public final class StudentAttributes extends EntityAttributes<CourseStudent> {
     }
 
     public String getRegistrationUrl() {
-        return Config.getFrontEndAppUrl(Const.WebPageURIs.JOIN_PAGE)
-                .withRegistrationKey(key)
-                .withEntityType(Const.EntityType.STUDENT)
-                .toString();
+        return registrationPageUrl(key, Const.EntityType.STUDENT);
     }
 
     public String getName() {
