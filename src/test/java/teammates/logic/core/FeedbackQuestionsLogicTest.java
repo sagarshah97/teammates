@@ -81,6 +81,7 @@ public class FeedbackQuestionsLogicTest extends BaseLogicTest {
         testGetFeedbackQuestionsForInstructor();
         testHasFeedbackQuestionsForStudents();
         testGetFeedbackQuestionsForStudents();
+        testIsFeedbackSessionForUserTypeToAnswer();
         testAddQuestion();
     }
 
@@ -1043,6 +1044,30 @@ public class FeedbackQuestionsLogicTest extends BaseLogicTest {
         actualQuestions = fqLogic.getFeedbackQuestionsForStudents(allQuestions);
 
         assertEquals(actualQuestions, expectedQuestions);
+    }
+
+    private void testIsFeedbackSessionForUserTypeToAnswer() {
+        dataBundle = loadDataBundle("/FeedbackSessionsLogicTest.json");
+
+        ______TS("Non-visible session should not be for any types of user to answer");
+        FeedbackSessionAttributes session = dataBundle.feedbackSessions.get("awaiting.session");
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, false));
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, true));
+
+        ______TS("Empty session should not be for any types of user to answer");
+        session = dataBundle.feedbackSessions.get("empty.session");
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, false));
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, true));
+
+        ______TS("Session without student question should not be for students to answer");
+        session = dataBundle.feedbackSessions.get("archiveCourse.session1");
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, false));
+        assertTrue(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, true));
+
+        ______TS("Session without instructor question should not be for instructors to answer");
+        session = dataBundle.feedbackSessions.get("session1InCourse2");
+        assertTrue(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, true));
+        assertFalse(fqLogic.isFeedbackSessionForUserTypeToAnswer(session, false));
     }
 
     private FeedbackQuestionAttributes getQuestionFromDatabase(String questionKey) {
